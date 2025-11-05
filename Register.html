@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Attendance Management Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Link to CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="register-container">
+    <h2>Create an Account</h2>
+    <form id="registerForm" action="/submit-register" method="POST">
+
+      <!-- Full Name -->
+      <input type="text" name="fullname" placeholder="Full Name" required>
+
+      <!-- Email -->
+      <input type="email" name="email" placeholder="Email" required>
+
+      <!-- Username -->
+      <input type="text" name="username" placeholder="Username" required>
+
+      <!-- Password -->
+      <input type="password" name="password" placeholder="Password" required>
+
+      <!-- Confirm Password -->
+      <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+
+      <!-- Register Button -->
+      <button type="submit">Register</button>
+
+      <!-- Link back to login -->
+      <a href="index.html" class="back-to-login">Already have an account? Login</a>
+    </form>
+  </div>
+
+  <!-- Link to JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
