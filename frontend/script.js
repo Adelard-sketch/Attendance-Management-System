@@ -32,17 +32,57 @@ document.addEventListener("DOMContentLoaded", () => {
     registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(registerForm);
+      
+      // Get form values
+      const fullname = formData.get("fullname").trim();
+      const email = formData.get("email").trim();
+      const username = formData.get("username").trim();
       const password = formData.get("password");
       const confirm = formData.get("confirm_password");
       const role = formData.get("role");
+      
+      // Client-side validation
+      if (fullname.split(' ').length < 2) {
+        alert("❌ Please enter your full name (first and last name)");
+        return;
+      }
+      
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alert("❌ Please enter a valid email address");
+        return;
+      }
+      
+      // Username validation
+      if (username.length < 3 || username.length > 20) {
+        alert("❌ Username must be between 3 and 20 characters");
+        return;
+      }
+      
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        alert("❌ Username can only contain letters, numbers, and underscores");
+        return;
+      }
+      
+      // Password validation
+      if (password.length < 8) {
+        alert("❌ Password must be at least 8 characters long");
+        return;
+      }
+      
+      if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+        alert("❌ Password must contain both letters and numbers");
+        return;
+      }
 
       if (password !== confirm) {
-        alert("Passwords do not match!");
+        alert("❌ Passwords do not match!");
         return;
       }
 
       if (!role) {
-        alert("Please select your role type.");
+        alert("❌ Please select your role type.");
         return;
       }
 
@@ -72,19 +112,45 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(loginForm);
+      
+      // Client-side validation
+      const username = formData.get("username").trim();
+      const password = formData.get("password");
+      const userType = formData.get("userType");
+      
+      if (username.length < 3) {
+        alert("❌ Username must be at least 3 characters long");
+        return;
+      }
+      
+      if (!userType) {
+        alert("❌ Please select your role");
+        return;
+      }
 
       try {
-        const res = await fetch("http://localhost/Activity3/api/login.php", {
+        const res = await fetch("http://localhost/Activity3/api/Login.php", {
           method: "POST",
           body: formData,
+          credentials: "include"
         });
         const data = await res.json();
 
         if (data.success) {
           localStorage.setItem("loggedInUser", data.username);
           localStorage.setItem("userType", data.role);
-          alert(`Welcome back, ${data.username}!`);
-          window.location.href = "Dashboard.html";
+          localStorage.setItem("fullname", data.fullname || data.username);
+          
+          alert(`Welcome back, ${data.fullname || data.username}!`);
+          
+          // Redirect based on role
+          if (data.role === 'student') {
+            window.location.href = "StudentDashboard.html";
+          } else if (data.role === 'lecturer' || data.role === 'intern') {
+            window.location.href = "FacultyDashboard.html";
+          } else {
+            window.location.href = "Dashboard.html";
+          }
         } else {
           alert("❌ Login failed: " + data.message);
         }

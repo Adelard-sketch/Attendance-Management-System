@@ -57,7 +57,7 @@ main {
 
 
 aside {
-  background-color: white;
+  background-color: #3182bd;
   width: 220px;
   padding: 1em;
   border-radius: 10px;
@@ -65,7 +65,7 @@ aside {
 }
 
 aside h2 {
-  color: #e6550d;
+  color: #fff;
   margin-bottom: 1em;
 }
 

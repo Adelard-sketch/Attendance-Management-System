@@ -50,9 +50,9 @@ select {
 
 input:focus,
 select:focus {
-  border-color: #de2d26;
+  border-color: #228B22;
   outline: none;
-  box-shadow: 0 0 6px rgba(222, 45, 38, 0.4);
+  box-shadow: 0 0 6px rgba(34, 139, 34, 0.4);
 }
 
 /* Dropdown styling */
@@ -89,7 +89,7 @@ button:hover {
 .toggle-link {
   display: block;
   margin-top: 12px;
-  color: #de2d26; 
+  color: #228B22; 
   text-decoration: none;
   cursor: pointer;
   font-size: 14px;

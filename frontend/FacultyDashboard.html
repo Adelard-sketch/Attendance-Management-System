@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Dashboard</title>
+  <link rel="stylesheet" href="Dashboard.css" />
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 8px;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover { color: #000; }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-primary { background-color: #3182bd; color: white; }
+    .btn-success { background-color: #28a745; color: white; }
+    .btn-danger { background-color: #dc3545; color: white; }
+    .btn-secondary { background-color: #6c757d; color: white; }
+    .btn:hover { opacity: 0.8; }
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .status-pending { background-color: #ffc107; color: #000; }
+    .status-approved { background-color: #28a745; color: white; }
+    .status-rejected { background-color: #dc3545; color: white; }
+    .quick-stats {
+      display: flex;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .stat-card {
+      flex: 1;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #3182bd;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Faculty Dashboard</h1>
+    <div id="user-info"></div>
+  </header>
+
+  <nav>
+    <a href="#" class="active" data-section="courses">My Courses</a>
+    <a href="#" data-section="requests">Enrollment Requests</a>
+    <a href="#" data-section="sessions">Sessions & Attendance</a>
+    <a href="#" id="logoutBtn">Logout</a>
+  </nav>
+
+  <main>
+    <aside>
+      <h2>Quick Actions</h2>
+      <ul>
+        <li><a href="#" id="createCourseBtn">Create New Course</a></li>
+        <li><a href="#" data-section="requests">Review Requests</a></li>
+        <li><a href="#" id="createSessionBtn">Add New Session</a></li>
+        <li><a href="#" data-section="sessions">View Sessions</a></li>
+      </ul>
+    </aside>
+
+    <section id="dashboard-content">
+      <div class="quick-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="stat-courses">0</div>
+          <div>Total Courses</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-requests">0</div>
+          <div>Pending Requests</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-students">0</div>
+          <div>Total Students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-sessions">0</div>
+          <div>Total Sessions</div>
+        </div>
+      </div>
+      <h2>My Courses</h2>
+      <div id="table-container"></div>
+    </section>
+  </main>
+
+  <!-- Create Course Modal -->
+  <div id="createCourseModal" class="modal">
+    <div class="modal-content">
+      <span class="close" data-modal="createCourseModal">&times;</span>
+      <h2>Create New Course</h2>
+      <form id="createCourseForm">
+        <div class="form-group">
+          <label for="course_code">Course Code *</label>
+          <input type="text" id="course_code" name="course_code" placeholder="e.g., CS101" required pattern="[A-Z]{2,4}\d{3}">
+          <small>Format: 2-4 letters followed by 3 digits (e.g., CS101, MATH201)</small>
+        </div>
+        <div class="form-group">
+          <label for="course_name">Course Name *</label>
+          <input type="text" id="course_name" name="course_name" placeholder="Introduction to Computer Science" required>
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="4" placeholder="Course description..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="credits">Credits</label>
+          <input type="number" id="credits" name="credits" value="3" min="1" max="6">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Course</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('createCourseModal')">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Create Session Modal -->
+  <div id="createSessionModal" class="modal">
+    <div class="modal-content">
+      <span class="close" data-modal="createSessionModal">&times;</span>
+      <h2>Create New Session</h2>
+      <form id="createSessionForm">
+        <div class="form-group">
+          <label for="session_course_id">Course *</label>
+          <select id="session_course_id" name="course_id" required>
+            <option value="">Select a course...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="session_number">Session Number *</label>
+          <input type="number" id="session_number" name="session_number" placeholder="1" required min="1">
+        </div>
+        <div class="form-group">
+          <label for="session_date">Date *</label>
+          <input type="date" id="session_date" name="date" required>
+        </div>
+        <div class="form-group">
+          <label for="start_time">Start Time *</label>
+          <input type="time" id="start_time" name="start_time" required>
+        </div>
+        <div class="form-group">
+          <label for="end_time">End Time *</label>
+          <input type="time" id="end_time" name="end_time" required>
+        </div>
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input type="text" id="location" name="location" placeholder="Room 101, Building A">
+        </div>
+        <div class="form-group">
+          <label for="session_description">Description</label>
+          <textarea id="session_description" name="description" rows="3" placeholder="Session topics and objectives..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Session</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('createSessionModal')">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mark Attendance Modal -->
+  <div id="attendanceModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <span class="close" data-modal="attendanceModal">&times;</span>
+      <h2>Mark Attendance</h2>
+      <div id="attendance-session-info" style="margin-bottom: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>
+      <div id="attendance-table-container"></div>
+      <div style="margin-top: 20px; text-align: right;">
+        <button type="button" class="btn btn-success" id="saveAttendanceBtn">Save Attendance</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('attendanceModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Ashesi University
+  </footer>
+
+  <script src="faculty-dashboard.js"></script>
+</body>
+</html>

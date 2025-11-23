@@ -6,9 +6,9 @@ use MongoDB\Client;
 
 // MongoDB connection
 try {
-    // Change "attendance_db" to your desired database name
+    // Database name: ashesi
     $mongoClient = new Client("mongodb://localhost:27017");
-    $db = $mongoClient->attendance_db; 
+    $db = $mongoClient->ashesi; 
 } catch (Exception $e) {
     die(json_encode([
         "success" => false,

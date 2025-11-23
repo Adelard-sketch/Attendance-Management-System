@@ -9,17 +9,17 @@
 <div class="register-container">
   <h2>Create Account</h2>
   <form id="registerForm">
-    <input type="text" name="fullname" placeholder="Full Name" required>
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="text" name="username" placeholder="Username" required>
+    <input type="text" name="fullname" placeholder="Full Name" required minlength="3" title="Enter your full name (first and last name)">
+    <input type="email" name="email" placeholder="Email" required title="Enter a valid email address">
+    <input type="text" name="username" placeholder="Username" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+" title="Username: 3-20 characters, letters, numbers, and underscores only">
     <select name="role" required>
       <option value="">Select Role</option>
       <option value="student">Student</option>
       <option value="lecturer">Lecturer</option>
       <option value="intern">Faculty Intern</option>
     </select>
-    <input type="password" name="password" placeholder="Password" required>
-    <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+    <input type="password" name="password" placeholder="Password (min 8 chars, letters & numbers)" required minlength="8" title="Password must be at least 8 characters and contain both letters and numbers">
+    <input type="password" name="confirm_password" placeholder="Confirm Password" required minlength="8">
     <button type="submit">Register</button>
     <a href="Login.html">Already have an account? Login</a>
   </form>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Diagnostics</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { padding: 10px 20px; margin: 5px; }
+        .result { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 4px; white-space: pre-wrap; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>API Diagnostics</h1>
+    
+    <div>
+        <button onclick="testEnrolled()">Test Enrolled Courses</button>
+        <button onclick="testAvailable()">Test Available Courses</button>
+        <button onclick="testRequests()">Test My Requests</button>
+        <button onclick="testAttendance()">Test My Attendance</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost/Activity3/api';
+        
+        async function testAPI(name, url) {
+            const results = document.getElementById('results');
+            results.innerHTML = `<div class="result">Testing ${name}...</div>`;
+            
+            try {
+                console.log('Fetching:', url);
+                const response = await fetch(url, { credentials: 'include' });
+                
+                console.log('Status:', response.status);
+                console.log('Headers:', [...response.headers.entries()]);
+                
+                const text = await response.text();
+                console.log('Response:', text);
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    results.innerHTML = `<div class="result error">
+                        <strong>${name} - Invalid JSON Response</strong><br>
+                        Status: ${response.status}<br>
+                        Raw Response:<br>${text}
+                    </div>`;
+                    return;
+                }
+                
+                results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">
+                    <strong>${name}</strong><br>
+                    Status: ${response.status}<br>
+                    Success: ${data.success}<br>
+                    ${data.message ? 'Message: ' + data.message + '<br>' : ''}
+                    <br>Full Response:<br>${JSON.stringify(data, null, 2)}
+                </div>`;
+                
+            } catch (error) {
+                results.innerHTML = `<div class="result error">
+                    <strong>${name} - Fetch Error</strong><br>
+                    Error: ${error.message}<br>
+                    Stack: ${error.stack}
+                </div>`;
+                console.error('Full error:', error);
+            }
+        }
+        
+        function testEnrolled() {
+            testAPI('Enrolled Courses', `${API_BASE}/manageEnrollments.php?action=enrolled`);
+        }
+        
+        function testAvailable() {
+            testAPI('Available Courses', `${API_BASE}/manageCourses.php?action=list`);
+        }
+        
+        function testRequests() {
+            testAPI('My Requests', `${API_BASE}/manageEnrollments.php?action=list`);
+        }
+        
+        function testAttendance() {
+            testAPI('My Attendance', `${API_BASE}/manageAttendance.php?action=student_attendance`);
+        }
+    </script>
+</body>
+</html>

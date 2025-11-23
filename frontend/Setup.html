@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup & Diagnostics</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 { color: #3182bd; }
+    h2 { color: #333; border-bottom: 2px solid #3182bd; padding-bottom: 10px; }
+    button {
+      background-color: #3182bd;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover { opacity: 0.8; }
+    button.success { background-color: #28a745; }
+    button.danger { background-color: #dc3545; }
+    .result {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+    .success { background-color: #d4edda; color: #155724; }
+    .error { background-color: #f8d7da; color: #721c24; }
+    .info { background-color: #d1ecf1; color: #0c5460; }
+    .warning { background-color: #fff3cd; color: #856404; }
+  </style>
+</head>
+<body>
+  <h1>🔧 System Setup & Diagnostics</h1>
+  
+  <div class="section">
+    <h2>1. System Verification</h2>
+    <p>Verify that password hashing and database connections are working correctly.</p>
+    <button class="success" onclick="verifySystem()">🔍 Verify System</button>
+    <div id="verify-result"></div>
+  </div>
+
+  <div class="section">
+    <h2>2. Database Setup</h2>
+    <p>Populate the database with sample courses for testing.</p>
+    <button onclick="populateSampleCourses()">Populate Sample Courses</button>
+    <button onclick="checkDatabaseStatus()">Check Database Status</button>
+    <div id="db-result"></div>
+  </div>
+
+  <div class="section">
+    <h2>3. API Connection Tests</h2>
+    <button onclick="testAllAPIs()">Test All APIs</button>
+    <button onclick="testRegistration()">Test Registration Endpoint</button>
+    <button onclick="testLogin()">Test Login Endpoint</button>
+    <button onclick="testCourses()">Test Courses Endpoint</button>
+    <div id="api-result"></div>
+  </div>
+
+  <div class="section">
+    <h2>4. Sample User Accounts</h2>
+    <p>Create test accounts for development:</p>
+    <button onclick="createSampleAccounts()">Create Sample Accounts</button>
+    <div id="accounts-result"></div>
+    
+    <div class="info result" style="margin-top: 20px;">
+      <strong>Test Accounts (after creation):</strong><br><br>
+      <strong>Faculty Account:</strong><br>
+      Username: faculty_test<br>
+      Password: Faculty123<br>
+      Role: Lecturer<br><br>
+      
+      <strong>Student Account:</strong><br>
+      Username: student_test<br>
+      Password: Student123<br>
+      Role: Student
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>5. Quick Links</h2>
+    <button onclick="window.location.href='Register.html'">Go to Registration</button>
+    <button onclick="window.location.href='Login.html'">Go to Login</button>
+    <button onclick="window.location.href='FacultyDashboard.html'">Faculty Dashboard</button>
+    <button onclick="window.location.href='StudentDashboard.html'">Student Dashboard</button>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost/Activity3/api';
+
+    async function verifySystem() {
+      const resultDiv = document.getElementById('verify-result');
+      resultDiv.innerHTML = '<div class="info result">Verifying system...</div>';
+      
+      try {
+        const response = await fetch(`${API_BASE}/verify_system.php`);
+        const data = await response.json();
+        
+        if (data.success) {
+          const summary = data.summary;
+          const checks = data.checks;
+          
+          let html = '<strong>System Verification Results:</strong><br><br>';
+          
+          // Password hashing check
+          if (summary.password_hashing_working === true) {
+            html += '✅ <strong>Password Hashing:</strong> Working correctly (bcrypt)<br>';
+          } else if (summary.password_hashing_working === false) {
+            html += '❌ <strong>Password Hashing:</strong> NOT working properly!<br>';
+          } else {
+            html += '⚠️ <strong>Password Hashing:</strong> No users to check<br>';
+          }
+          
+          // Database stats
+          html += `<br><strong>Database Statistics:</strong><br>`;
+          html += `- Users: ${summary.users}<br>`;
+          html += `- Courses: ${summary.courses}<br>`;
+          html += `- Enrollment Requests: ${summary.enrollments}<br>`;
+          
+          // Detailed checks
+          if (checks.password_format) {
+            html += `<br><strong>Sample Password Hash:</strong> ${checks.password_format} (${checks.password_length} chars)<br>`;
+          }
+          
+          const cssClass = summary.password_hashing_working ? 'success' : 'warning';
+          resultDiv.innerHTML = `<div class="result ${cssClass}">${html}</div>`;
+        } else {
+          resultDiv.innerHTML = `<div class="result error">❌ Error: ${data.error}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ Error: ${error.message}<br>Make sure MongoDB is running!</div>`;
+      }
+    }
+
+    async function populateSampleCourses() {
+      const resultDiv = document.getElementById('db-result');
+      resultDiv.innerHTML = '<div class="info result">Populating courses...</div>';
+      
+      try {
+        const response = await fetch(`${API_BASE}/populateSampleCourses.php`);
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = `<div class="result success">✅ ${data.message}\nInserted ${data.inserted_count} courses</div>`;
+        } else {
+          resultDiv.innerHTML = `<div class="result error">❌ ${data.message}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ Error: ${error.message}</div>`;
+      }
+    }
+
+    async function checkDatabaseStatus() {
+      const resultDiv = document.getElementById('db-result');
+      resultDiv.innerHTML = '<div class="info result">Checking database...</div>';
+      
+      try {
+        const response = await fetch(`${API_BASE}/manageCourses.php?action=list`, {
+          credentials: 'include'
+        });
+        
+        if (response.status === 401) {
+          resultDiv.innerHTML = `<div class="result warning">⚠️ Not logged in. Login first to view courses.\nAPI endpoint is working.</div>`;
+        } else if (response.ok) {
+          const data = await response.json();
+          const courses = data.courses || [];
+          resultDiv.innerHTML = `<div class="result success">✅ Database connected\nFound ${courses.length} courses</div>`;
+        } else {
+          resultDiv.innerHTML = `<div class="result error">❌ HTTP ${response.status}: ${response.statusText}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ Error: ${error.message}\nMake sure MongoDB is running!</div>`;
+      }
+    }
+
+    async function testAllAPIs() {
+      const resultDiv = document.getElementById('api-result');
+      resultDiv.innerHTML = '<div class="info result">Testing APIs...</div>';
+      
+      const endpoints = [
+        { name: 'Registration', url: `${API_BASE}/register.php`, method: 'OPTIONS' },
+        { name: 'Login', url: `${API_BASE}/Login.php`, method: 'OPTIONS' },
+        { name: 'Courses', url: `${API_BASE}/manageCourses.php`, method: 'GET' },
+        { name: 'Enrollments', url: `${API_BASE}/manageEnrollments.php`, method: 'GET' },
+        { name: 'Dashboard', url: `${API_BASE}/dashboard.php`, method: 'GET' }
+      ];
+      
+      let results = '<strong>API Connectivity Tests:</strong><br><br>';
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await fetch(endpoint.url, {
+            method: endpoint.method,
+            credentials: 'include'
+          });
+          
+          const status = response.status;
+          if (status === 200 || status === 401 || status === 403) {
+            results += `✅ ${endpoint.name}: Reachable (${status})<br>`;
+          } else {
+            results += `⚠️ ${endpoint.name}: Unexpected status (${status})<br>`;
+          }
+        } catch (error) {
+          results += `❌ ${endpoint.name}: Connection failed<br>`;
+        }
+      }
+      
+      results += '<br><small>Note: 401/403 are expected for protected endpoints when not logged in.</small>';
+      resultDiv.innerHTML = `<div class="result info">${results}</div>`;
+    }
+
+    async function testRegistration() {
+      const resultDiv = document.getElementById('api-result');
+      resultDiv.innerHTML = '<div class="info result">Testing registration...</div>';
+      
+      try {
+        const response = await fetch(`${API_BASE}/register.php`, {
+          method: 'OPTIONS'
+        });
+        
+        if (response.ok) {
+          resultDiv.innerHTML = `<div class="result success">✅ Registration endpoint is accessible\nCORS headers: ${response.headers.get('Access-Control-Allow-Origin')}</div>`;
+        } else {
+          resultDiv.innerHTML = `<div class="result error">❌ Registration endpoint returned ${response.status}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ Cannot reach registration endpoint\n${error.message}</div>`;
+      }
+    }
+
+    async function testLogin() {
+      const resultDiv = document.getElementById('api-result');
+      resultDiv.innerHTML = '<div class="info result">Testing login...</div>';
+      
+      try {
+        const response = await fetch(`${API_BASE}/Login.php`, {
+          method: 'POST',
+          credentials: 'include',
+          body: new FormData()
+        });
+        
+        const data = await response.json();
+        resultDiv.innerHTML = `<div class="result success">✅ Login endpoint is accessible\nResponse: ${data.message || 'Missing fields (expected)'}</div>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ Cannot reach login endpoint\n${error.message}</div>`;
+      }
+    }
+
+    async function testCourses() {
+      const resultDiv = document.getElementById('api-result');
+      resultDiv.innerHTML = '<div class="info result">Testing courses...</div>';
+      
+      try {
+        const response = await fetch(`${API_BASE}/manageCourses.php?action=list`, {
+          credentials: 'include'
+        });
+        
+        if (response.status === 401) {
+          resultDiv.innerHTML = `<div class="result warning">⚠️ Courses endpoint requires authentication (this is correct)\nPlease login first.</div>`;
+        } else if (response.ok) {
+          const data = await response.json();
+          const courses = data.courses || [];
+          resultDiv.innerHTML = `<div class="result success">✅ Courses endpoint accessible\nFound ${courses.length} courses</div>`;
+        } else {
+          resultDiv.innerHTML = `<div class="result error">❌ Courses endpoint error: ${response.status}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ Cannot reach courses endpoint\n${error.message}</div>`;
+      }
+    }
+
+    async function createSampleAccounts() {
+      const resultDiv = document.getElementById('accounts-result');
+      resultDiv.innerHTML = '<div class="info result">Creating sample accounts...</div>';
+      
+      const accounts = [
+        {
+          fullname: 'Test Faculty Member',
+          email: 'faculty.test@ashesi.edu.gh',
+          username: 'faculty_test',
+          role: 'lecturer',
+          password: 'Faculty123'
+        },
+        {
+          fullname: 'Test Student User',
+          email: 'student.test@ashesi.edu.gh',
+          username: 'student_test',
+          role: 'student',
+          password: 'Student123'
+        }
+      ];
+      
+      let results = '<strong>Account Creation Results:</strong><br><br>';
+      
+      for (const account of accounts) {
+        try {
+          const formData = new FormData();
+          Object.keys(account).forEach(key => formData.append(key, account[key]));
+          
+          const response = await fetch(`${API_BASE}/register.php`, {
+            method: 'POST',
+            body: formData
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            results += `✅ ${account.role}: ${account.username} created successfully<br>`;
+          } else {
+            results += `⚠️ ${account.role}: ${data.message}<br>`;
+          }
+        } catch (error) {
+          results += `❌ ${account.role}: ${error.message}<br>`;
+        }
+      }
+      
+      resultDiv.innerHTML = `<div class="result info">${results}</div>`;
+    }
+  </script>
+</body>
+</html>

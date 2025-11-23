@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test</title>
+</head>
+<body>
+    <h1>Direct Login Test</h1>
+    <button onclick="testLogin()">Test Login API</button>
+    <button onclick="testDB()">Test DB Connection</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testDB() {
+            const result = document.getElementById('result');
+            result.textContent = 'Testing database...';
+            
+            try {
+                const response = await fetch('http://localhost/Activity3/api/check_db.php');
+                const text = await response.text();
+                result.textContent = 'DB Check Response:\n' + text;
+            } catch (error) {
+                result.textContent = 'DB Check Error:\n' + error.message + '\n' + error.stack;
+            }
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('result');
+            result.textContent = 'Testing login...';
+            
+            const formData = new FormData();
+            formData.append('username', 'faculty_test');
+            formData.append('password', 'Faculty123');
+            formData.append('userType', 'lecturer');
+            
+            try {
+                console.log('Sending request to: http://localhost/Activity3/api/Login.php');
+                
+                const response = await fetch('http://localhost/Activity3/api/Login.php', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                const text = await response.text();
+                console.log('Response text:', text);
+                
+                result.textContent = 'Login Response:\n' + 
+                    'Status: ' + response.status + '\n' +
+                    'Response: ' + text;
+                
+            } catch (error) {
+                result.textContent = 'Login Error:\n' + error.message + '\n' + error.stack;
+                console.error('Full error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

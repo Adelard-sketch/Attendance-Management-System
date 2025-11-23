@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Test Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 { color: #3182bd; }
+    h2 { color: #333; border-bottom: 2px solid #3182bd; padding-bottom: 10px; }
+    .test-result {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .success { background-color: #d4edda; color: #155724; }
+    .error { background-color: #f8d7da; color: #721c24; }
+    .info { background-color: #d1ecf1; color: #0c5460; }
+    button {
+      background-color: #3182bd;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover { opacity: 0.8; }
+    .test-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .test-links a {
+      display: block;
+      padding: 15px;
+      background: #3182bd;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .test-links a:hover { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Attendance Management System - Test Page</h1>
+  
+  <div class="test-section">
+    <h2>System Status Check</h2>
+    <button onclick="checkAPIs()">Test All APIs</button>
+    <div id="api-results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Quick Links</h2>
+    <div class="test-links">
+      <a href="Register.html">📝 Register Page</a>
+      <a href="Login.html">🔐 Login Page</a>
+      <a href="StudentDashboard.html">👨‍🎓 Student Dashboard</a>
+      <a href="FacultyDashboard.html">👨‍🏫 Faculty Dashboard</a>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test Credentials</h2>
+    <div class="info test-result">
+      <strong>Note:</strong> You need to register these accounts first before testing.
+    </div>
+    
+    <h3>Student Test Account</h3>
+    <ul>
+      <li><strong>Full Name:</strong> John Doe</li>
+      <li><strong>Email:</strong> john.doe@ashesi.edu.gh</li>
+      <li><strong>Username:</strong> johndoe</li>
+      <li><strong>Password:</strong> Student123</li>
+      <li><strong>Role:</strong> Student</li>
+    </ul>
+
+    <h3>Faculty Test Account</h3>
+    <ul>
+      <li><strong>Full Name:</strong> Dr. Jane Smith</li>
+      <li><strong>Email:</strong> jane.smith@ashesi.edu.gh</li>
+      <li><strong>Username:</strong> janesmith</li>
+      <li><strong>Password:</strong> Faculty123</li>
+      <li><strong>Role:</strong> Lecturer</li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Implementation Checklist</h2>
+    <div class="info test-result">
+      <h3>✅ Completed Features:</h3>
+      <ul>
+        <li>✅ User Registration with password hashing</li>
+        <li>✅ User Login with role-based authentication</li>
+        <li>✅ Session management and authentication middleware</li>
+        <li>✅ Dashboard access control (redirects to login if not authenticated)</li>
+        <li>✅ Faculty can create courses</li>
+        <li>✅ Faculty can view and manage enrollment requests</li>
+        <li>✅ Faculty can approve/reject student requests</li>
+        <li>✅ Students can browse available courses</li>
+        <li>✅ Students can request to join courses</li>
+        <li>✅ Students can view enrolled courses</li>
+        <li>✅ Server-side input validation</li>
+        <li>✅ Client-side input validation</li>
+        <li>✅ Secure password storage (hashed)</li>
+        <li>✅ XSS and injection prevention</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Testing Instructions</h2>
+    <ol>
+      <li><strong>Test Registration:</strong>
+        <ul>
+          <li>Go to Register page</li>
+          <li>Try weak password (should fail with validation)</li>
+          <li>Register with valid credentials</li>
+        </ul>
+      </li>
+      <li><strong>Test Login:</strong>
+        <ul>
+          <li>Go to Login page</li>
+          <li>Try wrong credentials (should fail)</li>
+          <li>Login with correct credentials</li>
+          <li>Should redirect to appropriate dashboard based on role</li>
+        </ul>
+      </li>
+      <li><strong>Test Faculty Features:</strong>
+        <ul>
+          <li>Login as faculty</li>
+          <li>Create a new course (e.g., CS101 - Intro to CS)</li>
+          <li>View "My Courses" section</li>
+          <li>Keep browser open for student testing</li>
+        </ul>
+      </li>
+      <li><strong>Test Student Features:</strong>
+        <ul>
+          <li>Open a new browser window (or incognito)</li>
+          <li>Login as student</li>
+          <li>Browse "Available Courses"</li>
+          <li>Request to join the course created by faculty</li>
+          <li>View "My Requests" to see pending status</li>
+        </ul>
+      </li>
+      <li><strong>Test Request Management:</strong>
+        <ul>
+          <li>Switch back to faculty browser</li>
+          <li>Go to "Enrollment Requests" section</li>
+          <li>Should see the student's request</li>
+          <li>Approve the request</li>
+        </ul>
+      </li>
+      <li><strong>Verify Enrollment:</strong>
+        <ul>
+          <li>Switch to student browser</li>
+          <li>Refresh or go to "My Courses"</li>
+          <li>Should see the approved course in enrolled courses</li>
+        </ul>
+      </li>
+      <li><strong>Test Access Control:</strong>
+        <ul>
+          <li>Logout</li>
+          <li>Try accessing dashboard directly</li>
+          <li>Should redirect to login page</li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+
+  <script>
+    async function checkAPIs() {
+      const resultsDiv = document.getElementById('api-results');
+      resultsDiv.innerHTML = '<p>Testing APIs...</p>';
+      
+      const tests = [
+        { name: 'Registration API', url: '/Activity3/api/register.php', method: 'POST' },
+        { name: 'Login API', url: '/Activity3/api/Login.php', method: 'POST' },
+        { name: 'Logout API', url: '/Activity3/api/logout.php', method: 'POST' },
+        { name: 'Course Management API', url: '/Activity3/api/manageCourses.php', method: 'GET' },
+        { name: 'Enrollment API', url: '/Activity3/api/manageEnrollments.php', method: 'GET' },
+        { name: 'Dashboard API', url: '/Activity3/api/dashboard.php', method: 'GET' }
+      ];
+      
+      let results = '<h3>API Connectivity Tests:</h3>';
+      
+      for (const test of tests) {
+        try {
+          const response = await fetch(test.url, {
+            method: test.method,
+            credentials: 'include'
+          });
+          
+          const contentType = response.headers.get('content-type');
+          const isJSON = contentType && contentType.includes('application/json');
+          
+          if (response.ok || response.status === 401 || response.status === 403) {
+            results += `<div class="test-result success">✅ ${test.name}: Reachable (${response.status})</div>`;
+          } else {
+            results += `<div class="test-result error">❌ ${test.name}: Error (${response.status})</div>`;
+          }
+        } catch (error) {
+          results += `<div class="test-result error">❌ ${test.name}: Connection failed - ${error.message}</div>`;
+        }
+      }
+      
+      results += '<div class="test-result info"><strong>Note:</strong> 401/403 responses are expected for protected endpoints when not logged in.</div>';
+      resultsDiv.innerHTML = results;
+    }
+  </script>
+</body>
+</html>
