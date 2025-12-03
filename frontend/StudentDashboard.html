@@ -150,6 +150,18 @@
     © 2025 Ashesi University
   </footer>
 
+  <script>
+    // Inline authentication check - runs before other scripts
+    (function() {
+      const username = localStorage.getItem('loggedInUser');
+      const role = localStorage.getItem('userType');
+      
+      if (!username || !role || role !== 'student') {
+        alert('Access denied. Student credentials required.');
+        window.location.replace('Login.html');
+      }
+    })();
+  </script>
   <script src="student-dashboard.js"></script>
 </body>
 </html>

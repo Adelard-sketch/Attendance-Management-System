@@ -44,6 +44,18 @@
   </footer>
 
   <!-- script-->
+  <script>
+    // Authentication check
+    (function() {
+      const username = localStorage.getItem('loggedInUser');
+      const role = localStorage.getItem('userType');
+      
+      if (!username || !role) {
+        alert('Please login to access the dashboard');
+        window.location.href = 'Login.html';
+      }
+    })();
+  </script>
   <script src="script.js"></script>
 </body>
 </html>

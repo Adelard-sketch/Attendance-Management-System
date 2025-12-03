@@ -257,6 +257,18 @@
     © 2025 Ashesi University
   </footer>
 
+  <script>
+    // Inline authentication check - runs before other scripts
+    (function() {
+      const username = localStorage.getItem('loggedInUser');
+      const role = localStorage.getItem('userType');
+      
+      if (!username || !role || !['lecturer', 'intern'].includes(role)) {
+        alert('Access denied. Faculty credentials required.');
+        window.location.replace('Login.html');
+      }
+    })();
+  </script>
   <script src="faculty-dashboard.js"></script>
 </body>
 </html>
