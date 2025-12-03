@@ -1,6 +1,3 @@
-/**************************************
- * FACULTY DASHBOARD SCRIPT
- **************************************/
 
 const API_BASE = 'http://localhost/Activity3/api';
 
@@ -438,6 +435,7 @@ async function loadSessions() {
           <th>Time</th>
           <th>Location</th>
           <th>Status</th>
+          <th>Code</th>
           <th>Students</th>
           <th>Actions</th>
         </tr>
@@ -451,6 +449,10 @@ async function loadSessions() {
       session.status === 'in-progress' ? 'status-pending' :
       session.status === 'cancelled' ? 'status-rejected' : '';
     
+    const codeDisplay = session.attendance_code 
+      ? `<strong style="font-family: monospace; font-size: 1.2em; color: #2ecc71;">${session.attendance_code}</strong>`
+      : '<span style="color: #999;">Not set</span>';
+    
     html += `
       <tr>
         <td><strong>${session.course_code}</strong><br><small>${session.course_name}</small></td>
@@ -459,8 +461,11 @@ async function loadSessions() {
         <td>${session.start_time} - ${session.end_time}</td>
         <td>${session.location || 'N/A'}</td>
         <td><span class="status-badge ${statusClass}">${session.status}</span></td>
+        <td>${codeDisplay}</td>
         <td>${session.total_students || 0}</td>
         <td>
+          ${session.status === 'scheduled' ? `<button class="btn btn-success" onclick="startSession('${session._id}')">Start Session</button>` : ''}
+          ${session.status === 'in-progress' ? `<button class="btn btn-warning" onclick="endSession('${session._id}')">End Session</button>` : ''}
           <button class="btn btn-primary" onclick="openAttendanceModal('${session._id}')">Mark Attendance</button>
           <button class="btn btn-secondary" onclick="viewSessionDetails('${session._id}')">View</button>
           ${session.status === 'scheduled' ? `<button class="btn btn-danger" onclick="deleteSession('${session._id}', '${session.course_code} #${session.session_number}')">Delete</button>` : ''}
@@ -580,6 +585,19 @@ async function viewSessionDetails(sessionId) {
     const absentCount = attendance.filter(a => a.status === 'absent').length;
     const lateCount = attendance.filter(a => a.status === 'late').length;
     
+    const codeDisplay = session.attendance_code 
+      ? `<div style="background: #2ecc71; color: white; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0;">
+           <div style="font-size: 0.9em; margin-bottom: 5px;">Attendance Code</div>
+           <div style="font-family: monospace; font-size: 2em; font-weight: bold; letter-spacing: 0.2em;">${session.attendance_code}</div>
+         </div>`
+      : '<p style="color: #999; font-style: italic;">No attendance code generated yet.</p>';
+    
+    const statusControls = session.status === 'scheduled' 
+      ? `<button class="btn btn-success" onclick="startSession('${session._id}')">🟢 Start Session</button>`
+      : session.status === 'in-progress'
+      ? `<button class="btn btn-warning" onclick="endSession('${session._id}')">🔴 End Session</button>`
+      : '';
+    
     let details = `
       <div style="padding: 20px;">
         <h3>${session.course_code} - Session ${session.session_number}</h3>
@@ -587,8 +605,9 @@ async function viewSessionDetails(sessionId) {
         <p><strong>Date:</strong> ${formatDate(session.date)}</p>
         <p><strong>Time:</strong> ${session.start_time} - ${session.end_time}</p>
         <p><strong>Location:</strong> ${session.location || 'N/A'}</p>
-        <p><strong>Status:</strong> ${session.status}</p>
+        <p><strong>Status:</strong> <span class="status-badge">${session.status}</span> ${statusControls}</p>
         ${session.description ? `<p><strong>Description:</strong> ${session.description}</p>` : ''}
+        ${codeDisplay}
         <hr>
         <h4>Attendance Summary</h4>
         <p>Total Enrolled: ${enrolled.length}</p>
@@ -742,6 +761,64 @@ async function handleSaveAttendance() {
     if (result.success) {
       alert(`✅ Attendance saved successfully! (${result.marked_count} students marked)`);
       closeModal('attendanceModal');
+      loadSection('sessions');
+    } else {
+      alert('❌ ' + result.message);
+    }
+  } catch (error) {
+    alert('❌ Error: ' + error.message);
+  }
+}
+
+async function startSession(sessionId) {
+  if (!confirm('Start this session? Students will be able to mark attendance using the code.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE}/manageSessions.php`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        session_id: sessionId,
+        status: 'in-progress'
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert('✅ Session started! Share the attendance code with students.');
+      loadSection('sessions');
+    } else {
+      alert('❌ ' + result.message);
+    }
+  } catch (error) {
+    alert('❌ Error: ' + error.message);
+  }
+}
+
+async function endSession(sessionId) {
+  if (!confirm('End this session? The attendance code will no longer be valid.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE}/manageSessions.php`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        session_id: sessionId,
+        status: 'completed'
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert('✅ Session ended successfully!');
       loadSection('sessions');
     } else {
       alert('❌ ' + result.message);

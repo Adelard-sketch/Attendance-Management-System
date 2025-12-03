@@ -221,6 +221,9 @@ function handlePost() {
         return;
     }
     
+    // Generate unique attendance code (6-digit)
+    $attendanceCode = strtoupper(substr(md5(uniqid(rand(), true)), 0, 6));
+    
     // Create session
     $sessionData = [
         'course_id' => $data['course_id'],
@@ -235,6 +238,8 @@ function handlePost() {
         'location' => $data['location'] ?? '',
         'description' => $data['description'] ?? '',
         'status' => $data['status'] ?? 'scheduled',
+        'attendance_code' => $attendanceCode,
+        'code_expires_at' => null, // Set when session starts
         'attendance' => [],
         'created_at' => new MongoDB\BSON\UTCDateTime(),
         'updated_at' => new MongoDB\BSON\UTCDateTime()
@@ -245,7 +250,8 @@ function handlePost() {
     echo json_encode([
         'success' => true,
         'message' => 'Session created successfully',
-        'session_id' => (string)$result->getInsertedId()
+        'session_id' => (string)$result->getInsertedId(),
+        'attendance_code' => $attendanceCode
     ]);
 }
 

@@ -75,6 +75,10 @@ async function loadSection(section) {
         heading.textContent = 'Available Courses';
         await loadAvailableCourses();
         break;
+      case 'mark-attendance':
+        heading.textContent = 'Mark Attendance';
+        await loadMarkAttendance();
+        break;
       case 'requests':
         heading.textContent = 'My Enrollment Requests';
         await loadMyRequests();
@@ -457,4 +461,146 @@ function formatDate(dateStr) {
   const date = new Date(dateStr);
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
+}
+
+/**************************************
+ * MARK ATTENDANCE WITH CODE
+ **************************************/
+
+async function loadMarkAttendance() {
+  const container = document.getElementById('table-container');
+  
+  container.innerHTML = `
+    <div style="max-width: 600px; margin: 0 auto;">
+      <div class="course-card" style="text-align: center; padding: 30px;">
+        <h2 style="color: #3182bd; margin-bottom: 20px;">📍 Mark Your Attendance</h2>
+        <p style="margin-bottom: 30px; color: #666;">Enter the attendance code provided by your instructor</p>
+        
+        <div style="margin-bottom: 20px;">
+          <input 
+            type="text" 
+            id="attendance-code-input" 
+            placeholder="Enter 6-digit code" 
+            maxlength="6"
+            style="
+              width: 100%; 
+              padding: 15px; 
+              font-size: 24px; 
+              text-align: center; 
+              text-transform: uppercase;
+              letter-spacing: 5px;
+              border: 2px solid #ddd;
+              border-radius: 8px;
+              font-family: monospace;
+            "
+          />
+        </div>
+        
+        <button 
+          onclick="submitAttendanceCode()" 
+          class="btn btn-primary" 
+          style="width: 100%; padding: 15px; font-size: 16px;"
+        >
+          Submit Attendance
+        </button>
+        
+        <div id="attendance-result" style="margin-top: 20px;"></div>
+      </div>
+      
+      <div id="today-sessions" style="margin-top: 30px;"></div>
+    </div>
+  `;
+  
+  // Auto-uppercase as user types
+  document.getElementById('attendance-code-input').addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase();
+  });
+  
+  // Load today's available sessions
+  await loadTodaySessions();
+}
+
+async function loadTodaySessions() {
+  try {
+    const response = await fetch(`${API_BASE}/studentAttendance.php`, {
+      credentials: 'include'
+    });
+    
+    const data = await response.json();
+    
+    if (data.success && data.sessions && data.sessions.length > 0) {
+      const container = document.getElementById('today-sessions');
+      
+      let html = '<h3>Today\'s Sessions:</h3>';
+      data.sessions.forEach(session => {
+        const statusBadge = session.already_marked 
+          ? '<span class="status-badge status-approved">✓ Marked</span>'
+          : '<span class="status-badge status-pending">⏳ Pending</span>';
+        
+        html += `
+          <div class="course-card" style="border-left: 4px solid ${session.already_marked ? '#28a745' : '#ffc107'};">
+            <strong>${session.course_code}</strong> - ${session.course_name}<br>
+            <small>Session ${session.session_number} | ${session.start_time} - ${session.end_time}</small><br>
+            <small>Location: ${session.location || 'TBA'}</small><br>
+            ${statusBadge}
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+  } catch (error) {
+    console.error('Error loading today\'s sessions:', error);
+  }
+}
+
+async function submitAttendanceCode() {
+  const codeInput = document.getElementById('attendance-code-input');
+  const resultDiv = document.getElementById('attendance-result');
+  const code = codeInput.value.trim();
+  
+  if (!code || code.length !== 6) {
+    resultDiv.innerHTML = '<p style="color: #e74c3c;">❌ Please enter a valid 6-digit code</p>';
+    return;
+  }
+  
+  resultDiv.innerHTML = '<p style="color: #3498db;">⏳ Marking attendance...</p>';
+  
+  try {
+    const response = await fetch(`${API_BASE}/studentAttendance.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ code: code })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      const statusIcon = data.status === 'present' ? '✅' : '⚠️';
+      const statusText = data.status === 'present' ? 'Present' : 'Late';
+      const statusColor = data.status === 'present' ? '#27ae60' : '#f39c12';
+      
+      resultDiv.innerHTML = `
+        <div style="background: ${statusColor}15; border: 2px solid ${statusColor}; padding: 20px; border-radius: 8px;">
+          <h3 style="color: ${statusColor}; margin: 0;">${statusIcon} ${data.message}</h3>
+          <p style="margin: 10px 0 0 0;">
+            <strong>Status:</strong> ${statusText}<br>
+            <strong>Course:</strong> ${data.session.course_code} - ${data.session.course_name}<br>
+            <strong>Session:</strong> #${data.session.session_number}<br>
+            <strong>Time:</strong> ${data.session.time}
+          </p>
+        </div>
+      `;
+      
+      codeInput.value = '';
+      
+      // Reload today's sessions to update status
+      setTimeout(() => loadTodaySessions(), 1000);
+    } else {
+      resultDiv.innerHTML = `<p style="color: #e74c3c;">❌ ${data.message}</p>`;
+    }
+  } catch (error) {
+    resultDiv.innerHTML = `<p style="color: #e74c3c;">❌ Error: ${error.message}</p>`;
+  }
 }

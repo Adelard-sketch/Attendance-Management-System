@@ -18,12 +18,18 @@
     }
     .modal-content {
       background-color: #fefefe;
-      margin: 5% auto;
-      padding: 20px;
+      margin: 3% auto;
+      padding: 15px;
       border: 1px solid #888;
-      width: 80%;
-      max-width: 600px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
       border-radius: 8px;
+    }
+    .modal-content h2 {
+      margin-bottom: 10px;
+      font-size: 18px;
     }
     .close {
       color: #aaa;
@@ -34,19 +40,33 @@
     }
     .close:hover { color: #000; }
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
     .form-group label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       font-weight: bold;
+      font-size: 13px;
     }
-    .form-group input, .form-group textarea {
+    .form-group input, .form-group textarea, .form-group select {
       width: 100%;
       padding: 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
       box-sizing: border-box;
+    }
+    .form-actions {
+      margin-top: 20px;
+      text-align: right;
+      border-top: 2px solid #ddd;
+      padding-top: 15px;
+      background: #f8f9fa;
+      margin-left: -20px;
+      margin-right: -20px;
+      margin-bottom: -20px;
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-bottom: 20px;
     }
     .btn {
       padding: 10px 20px;
@@ -55,12 +75,15 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .btn-primary { background-color: #3182bd; color: white; }
     .btn-success { background-color: #28a745; color: white; }
     .btn-danger { background-color: #dc3545; color: white; }
     .btn-secondary { background-color: #6c757d; color: white; }
-    .btn:hover { opacity: 0.8; }
+    .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
     .status-badge {
       padding: 4px 8px;
       border-radius: 4px;
@@ -160,50 +183,58 @@
           <label for="credits">Credits</label>
           <input type="number" id="credits" name="credits" value="3" min="1" max="6">
         </div>
-        <button type="submit" class="btn btn-primary">Create Course</button>
-        <button type="button" class="btn btn-secondary" onclick="closeModal('createCourseModal')">Cancel</button>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">✓ Create Course</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('createCourseModal')">✕ Cancel</button>
+        </div>
       </form>
     </div>
   </div>
 
   <!-- Create Session Modal -->
   <div id="createSessionModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
       <span class="close" data-modal="createSessionModal">&times;</span>
       <h2>Create New Session</h2>
-      <form id="createSessionForm">
+      <form id="createSessionForm" style="flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
         <div class="form-group">
           <label for="session_course_id">Course *</label>
-          <select id="session_course_id" name="course_id" required>
+          <select id="session_course_id" name="course_id" required style="padding: 6px;">
             <option value="">Select a course...</option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="session_number">Session Number *</label>
-          <input type="number" id="session_number" name="session_number" placeholder="1" required min="1">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label for="session_number">Session # *</label>
+            <input type="number" id="session_number" name="session_number" placeholder="1" required min="1" style="padding: 6px;">
+          </div>
+          <div class="form-group">
+            <label for="session_date">Date *</label>
+            <input type="date" id="session_date" name="date" required style="padding: 6px;">
+          </div>
         </div>
-        <div class="form-group">
-          <label for="session_date">Date *</label>
-          <input type="date" id="session_date" name="date" required>
-        </div>
-        <div class="form-group">
-          <label for="start_time">Start Time *</label>
-          <input type="time" id="start_time" name="start_time" required>
-        </div>
-        <div class="form-group">
-          <label for="end_time">End Time *</label>
-          <input type="time" id="end_time" name="end_time" required>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label for="start_time">Start Time *</label>
+            <input type="time" id="start_time" name="start_time" required style="padding: 6px;">
+          </div>
+          <div class="form-group">
+            <label for="end_time">End Time *</label>
+            <input type="time" id="end_time" name="end_time" required style="padding: 6px;">
+          </div>
         </div>
         <div class="form-group">
           <label for="location">Location</label>
-          <input type="text" id="location" name="location" placeholder="Room 101, Building A">
+          <input type="text" id="location" name="location" placeholder="Room 101, Building A" style="padding: 6px;">
         </div>
         <div class="form-group">
           <label for="session_description">Description</label>
-          <textarea id="session_description" name="description" rows="3" placeholder="Session topics and objectives..."></textarea>
+          <textarea id="session_description" name="description" rows="2" placeholder="Session topics..." style="padding: 6px;"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Create Session</button>
-        <button type="button" class="btn btn-secondary" onclick="closeModal('createSessionModal')">Cancel</button>
+        <div class="form-actions" style="position: sticky; bottom: 0; z-index: 100;">
+          <button type="submit" class="btn btn-primary" style="font-size: 16px; padding: 12px 24px;">✓ Create Session</button>
+          <button type="button" class="btn btn-secondary" style="font-size: 16px; padding: 12px 24px;" onclick="closeModal('createSessionModal')">✕ Cancel</button>
+        </div>
       </form>
     </div>
   </div>
